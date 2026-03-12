@@ -1,0 +1,19 @@
+{
+    "lsp": {
+        "rust-analyzer": {
+            "initialization_options": {
+                "cargo": {
+                    "target": "x86_64-rust_os-none.json",
+                    "extraArgs": [
+                        "-Zjson-target-spec",
+                        "-Zbuild-std=core, compiler_builtins",
+                        "-Zbuild-std-features=compiler-builtins-mem"
+                    ],
+                    "extraEnv": {
+                        "RUSTUP_TOOLCHAIN": "nightly"
+                    }
+                }
+            }
+        }
+    }
+}
