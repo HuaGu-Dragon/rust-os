@@ -1,5 +1,8 @@
 #![no_std]
 #![no_main]
+#![feature(custom_test_frameworks)]
+#![test_runner(crate::test_runner)]
+#![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
 
@@ -9,11 +12,11 @@ pub mod vga_buffer;
 #[unsafe(no_mangle)]
 #[allow(clippy::empty_loop)]
 pub extern "C" fn _start() -> ! {
-    println!("Hello World!");
-    println!("The numbers are {} and {}", 42, 1.0 / 3.0);
-    print!("Testing print without newline...");
-    println!(" Done!");
-    panic!("Some panic message");
+    #[cfg(not(test))]
+    main();
+
+    #[cfg(test)]
+    test_main();
 
     loop {}
 }
@@ -22,4 +25,15 @@ pub extern "C" fn _start() -> ! {
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
     loop {}
+}
+
+#[cfg(not(test))]
+fn main() {
+    println!("Hello World!");
+}
+
+#[cfg(test)]
+fn test_runner(tests: &[&dyn Fn()]) {
+    println!("Running {} tests", tests.len());
+    tests.iter().for_each(|t| t());
 }

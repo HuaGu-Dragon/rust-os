@@ -150,13 +150,13 @@ impl<T, F> Drop for LazyLock<T, F> {
 mod tests {
     use super::*;
 
-    #[test]
+    #[test_case]
     fn test_lazy_lock_basic() {
         static LAZY: LazyLock<u32> = LazyLock::new(|| 42);
         assert_eq!(*LAZY, 42);
     }
 
-    #[test]
+    #[test_case]
     fn test_lazy_lock_with_closure() {
         let lazy: LazyLock<u32, _> = LazyLock::new(|| {
             let x = 10;
@@ -166,7 +166,7 @@ mod tests {
         assert_eq!(*lazy, 42);
     }
 
-    #[test]
+    #[test_case]
     fn test_is_initialized() {
         let lazy: LazyLock<u32> = LazyLock::new(|| 42);
         assert!(!lazy.is_initialized());
@@ -174,7 +174,7 @@ mod tests {
         assert!(lazy.is_initialized());
     }
 
-    #[test]
+    #[test_case]
     fn test_force() {
         let lazy: LazyLock<u32> = LazyLock::new(|| 42);
         assert!(!lazy.is_initialized());
@@ -183,7 +183,7 @@ mod tests {
         assert_eq!(*lazy, 42);
     }
 
-    #[test]
+    #[test_case]
     fn test_default() {
         let lazy: LazyLock<u32> = LazyLock::default();
         assert_eq!(*lazy, 0);
