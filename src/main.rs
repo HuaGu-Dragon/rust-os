@@ -6,6 +6,10 @@
 
 use core::panic::PanicInfo;
 
+#[cfg(test)]
+use crate::debug::Testable;
+
+mod debug;
 mod serial;
 pub mod sync;
 pub mod vga_buffer;
@@ -34,7 +38,7 @@ fn main() {
 }
 
 #[cfg(test)]
-fn test_runner(tests: &[&dyn Fn()]) {
+fn test_runner(tests: &[&dyn Testable]) {
     serial_println!("Running {} tests", tests.len());
-    tests.iter().for_each(|t| t());
+    tests.iter().for_each(|t| t.run());
 }
