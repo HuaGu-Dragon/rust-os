@@ -3,6 +3,12 @@
 version = 4
 
 [[package]]
+name = "bitflags"
+version = "2.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af"
+
+[[package]]
 name = "bootloader"
 version = "0.9.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -13,4 +19,14 @@ name = "rust-os"
 version = "0.1.0"
 dependencies = [
  "bootloader",
+ "uart_16550",
+]
+
+[[package]]
+name = "uart_16550"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71cceed8939ba6ebde9d1e8a603b3c7f1a239a3db22e1ff465ed71ddca7a7d66"
+dependencies = [
+ "bitflags",
 ]

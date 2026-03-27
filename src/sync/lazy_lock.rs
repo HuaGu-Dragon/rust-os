@@ -186,6 +186,6 @@ mod tests {
     #[test_case]
     fn test_default() {
         let lazy: LazyLock<u32> = LazyLock::default();
-        assert_eq!(*lazy, 0);
+        assert_eq!(*lazy, 1);
     }
 }

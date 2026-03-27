@@ -14,7 +14,8 @@ test = true
 bench = false
 
 [package.metadata.bootimage]
-test-args = ["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04"]
+test-args = ["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", "-serial", "stdio"]
 
 [dependencies]
 bootloader = "=0.9.32"
+uart_16550 = "0.5.0"
