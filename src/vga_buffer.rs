@@ -1,4 +1,4 @@
-use core::{fmt::Write, ops::Sub};
+use core::fmt::Write;
 
 use crate::sync::{lazy_lock::LazyLock, spin::SpinLock};
 
@@ -9,7 +9,7 @@ pub enum Color {
     Blue = 0x1,
     Green = 0x2,
     Cyan = 0x3,
-    Red = 4,
+    Red = 0x4,
     Magenta = 0x5,
     Brown = 0x6,
     LightGray = 0x7,
@@ -45,7 +45,7 @@ const BUFFER_WIDTH: usize = 80;
 
 #[repr(transparent)]
 struct Buffer {
-    chars: [ScreenChar; BUFFER_WIDTH * BUFFER_HEIGHT],
+    chars: [[ScreenChar; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
 
 static WRITER: LazyLock<SpinLock<Writer>> = LazyLock::new(|| {
@@ -77,10 +77,9 @@ impl Writer {
                 let color_code = self.color_code;
 
                 unsafe {
-                    self.buffer
-                        .chars
+                    self.buffer.chars[row]
                         .as_mut_ptr()
-                        .add(row * BUFFER_WIDTH + col)
+                        .add(col)
                         .write_volatile(ScreenChar {
                             ascii_character: byte,
                             color_code,
@@ -102,25 +101,17 @@ impl Writer {
 
     pub fn new_line(&mut self) {
         for row in 1..BUFFER_HEIGHT {
-            for col in 0..BUFFER_WIDTH {
-                // SAFETY:
-                let c = unsafe {
-                    self.buffer
-                        .chars
-                        .as_mut_ptr()
-                        .add(row * BUFFER_WIDTH + col)
-                        .read_volatile()
-                };
+            // SAFETY:
+            let line = unsafe { self.buffer.chars.as_mut_ptr().add(row).read_volatile() };
 
-                // SAFETY:
-                unsafe {
-                    self.buffer
-                        .chars
-                        .as_mut_ptr()
-                        .add(row.sub(1) * BUFFER_WIDTH + col)
-                        .write_volatile(c)
-                };
-            }
+            // SAFETY:
+            unsafe {
+                self.buffer
+                    .chars
+                    .as_mut_ptr()
+                    .add(row - 1)
+                    .write_volatile(line)
+            };
         }
         self.clear_row(BUFFER_HEIGHT - 1);
         self.column_position = 0;
@@ -132,15 +123,13 @@ impl Writer {
             color_code: self.color_code,
         };
 
-        for col in 0..BUFFER_WIDTH {
-            unsafe {
-                self.buffer
-                    .chars
-                    .as_mut_ptr()
-                    .add(row * BUFFER_WIDTH + col)
-                    .write_volatile(blank)
-            };
-        }
+        unsafe {
+            self.buffer
+                .chars
+                .as_mut_ptr()
+                .add(row)
+                .write_volatile([blank; BUFFER_WIDTH]);
+        };
     }
 }
 
