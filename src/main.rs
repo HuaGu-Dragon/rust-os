@@ -10,9 +10,17 @@ use core::panic::PanicInfo;
 use crate::debug::Testable;
 
 mod debug;
+pub mod port;
 mod serial;
 pub mod sync;
 pub mod vga_buffer;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+pub enum QemuExitCode {
+    Success = 0x10,
+    Failed = 0x11,
+}
 
 #[unsafe(no_mangle)]
 #[allow(clippy::empty_loop)]
@@ -24,6 +32,11 @@ pub extern "C" fn _start() -> ! {
     test_main();
 
     loop {}
+}
+
+pub fn exit_qemu(exit_code: QemuExitCode) {
+    let mut port = port::Port::new(0xF4);
+    unsafe { port.write(exit_code as u32) };
 }
 
 #[panic_handler]
@@ -41,4 +54,6 @@ fn main() {
 fn test_runner(tests: &[&dyn Testable]) {
     serial_println!("Running {} tests", tests.len());
     tests.iter().for_each(|t| t.run());
+
+    exit_qemu(QemuExitCode::Success);
 }
