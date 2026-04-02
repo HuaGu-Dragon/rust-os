@@ -155,3 +155,23 @@ macro_rules! println {
 pub fn _print(args: core::fmt::Arguments) {
     WRITER.lock().write_fmt(args).unwrap();
 }
+
+#[test_case]
+fn test_println_output() {
+    let s = "Some test string that fits on a single line";
+    println!("{}", s);
+
+    let buffer = unsafe {
+        WRITER
+            .lock()
+            .buffer
+            .chars
+            .as_ptr()
+            .add(BUFFER_HEIGHT - 2)
+            .read_volatile()
+    };
+    for (i, c) in s.chars().enumerate() {
+        let screen_char = buffer[i];
+        assert_eq!(char::from(screen_char.ascii_character), c);
+    }
+}
