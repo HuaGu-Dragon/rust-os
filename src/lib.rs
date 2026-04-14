@@ -9,7 +9,7 @@ use core::panic::PanicInfo;
 use crate::debug::Testable;
 
 mod debug;
-pub mod port;
+pub mod interrupt;
 pub mod serial;
 pub mod sync;
 pub mod vga_buffer;
@@ -39,7 +39,7 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 pub fn exit_qemu(exit_code: QemuExitCode) {
-    let mut port = port::Port::new(0xF4);
+    let mut port = x86_64::instructions::port::Port::new(0xF4);
     unsafe { port.write(exit_code as u32) };
 }
 
