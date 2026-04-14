@@ -1,9 +1,7 @@
-#[cfg(test)]
 pub trait Testable {
     fn run(&self);
 }
 
-#[cfg(test)]
 impl<T: Fn()> Testable for T {
     fn run(&self) {
         use crate::{serial_print, serial_println};
