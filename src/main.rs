@@ -23,6 +23,12 @@ fn main() {
     use rust_os::println;
 
     println!("Hello World!");
+
+    rust_os::init();
+
+    x86_64::instructions::interrupts::int3();
+
+    println!("not crash!")
 }
 
 #[cfg(not(test))]
