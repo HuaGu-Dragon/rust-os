@@ -26,6 +26,11 @@ fn main() {
 
     rust_os::init();
 
+    // trigger a page fault
+    unsafe {
+        *(0xdeadbeef as *mut u8) = 42;
+    };
+
     x86_64::instructions::interrupts::int3();
 
     println!("not crash!")
