@@ -26,14 +26,12 @@ fn main() {
 
     rust_os::init();
 
-    // trigger a page fault
-    unsafe {
-        *(0xdeadbeef as *mut u8) = 42;
-    };
+    #[allow(unconditional_recursion)]
+    fn stack_overflow() {
+        stack_overflow();
+    }
 
-    x86_64::instructions::interrupts::int3();
-
-    println!("not crash!")
+    stack_overflow();
 }
 
 #[cfg(not(test))]

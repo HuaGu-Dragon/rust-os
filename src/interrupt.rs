@@ -1,11 +1,15 @@
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
-use crate::{println, sync::lazy_lock::LazyLock};
+use crate::{gdt, println, sync::lazy_lock::LazyLock};
 
 static IDT: LazyLock<InterruptDescriptorTable> = LazyLock::new(|| {
     let mut idt = x86_64::structures::idt::InterruptDescriptorTable::new();
     idt.breakpoint.set_handler_fn(breakpoint_handler);
-    idt.double_fault.set_handler_fn(double_fault_handler);
+    unsafe {
+        idt.double_fault
+            .set_handler_fn(double_fault_handler)
+            .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX)
+    };
     idt
 });
 

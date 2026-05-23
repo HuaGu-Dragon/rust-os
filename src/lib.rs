@@ -24,6 +24,7 @@ pub enum QemuExitCode {
 }
 
 pub fn init() {
+    gdt::init();
     interrupt::init_idt();
 }
 
