@@ -10,7 +10,7 @@ use core::panic::PanicInfo;
 use crate::debug::Testable;
 
 mod debug;
-mod gdt;
+pub mod gdt;
 pub mod interrupt;
 pub mod serial;
 pub mod sync;
