@@ -25,7 +25,7 @@ fn panic(info: &PanicInfo) -> ! {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    serial_print!("stack_overflow::stack_overflow...\t");
+    serial_print!("test {:.<60}....", "stack_overflow::stack_overflow");
 
     rust_os::gdt::init();
     init_test_idt();
