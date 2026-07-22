@@ -5,7 +5,9 @@
                 "cargo": {
                     "target": "x86_64-rust_os-none.json",
                     "extraEnv": {
-                        "RUSTUP_TOOLCHAIN": "nightly"
+                        "RUSTUP_TOOLCHAIN": "nightly",
+                        // https://github.com/rust-lang/rust-analyzer/issues/21821
+                        "CARGO_UNSTABLE_JSON_TARGET_SPEC": "true"
                     }
                 }
             }
