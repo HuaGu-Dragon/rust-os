@@ -25,13 +25,6 @@ fn main() {
     println!("Hello World!");
 
     rust_os::init();
-
-    #[allow(unconditional_recursion)]
-    fn stack_overflow() {
-        stack_overflow();
-    }
-
-    stack_overflow();
 }
 
 #[cfg(not(test))]

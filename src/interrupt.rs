@@ -1,6 +1,16 @@
+use pic8259::ChainedPics;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
-use crate::{gdt, println, sync::lazy_lock::LazyLock};
+use crate::{
+    gdt, print, println,
+    sync::{lazy_lock::LazyLock, spin::SpinLock},
+};
+
+pub const PIC_1_OFFSET: u8 = 32;
+pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
+
+pub static PICS: SpinLock<ChainedPics> =
+    SpinLock::new(unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) });
 
 static IDT: LazyLock<InterruptDescriptorTable> = LazyLock::new(|| {
     let mut idt = x86_64::structures::idt::InterruptDescriptorTable::new();
@@ -8,10 +18,19 @@ static IDT: LazyLock<InterruptDescriptorTable> = LazyLock::new(|| {
     unsafe {
         idt.double_fault
             .set_handler_fn(double_fault_handler)
-            .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX)
+            .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX);
+
+        idt[InterruptIndex::Timer as u8].set_handler_fn(timer_interrupt_handler);
     };
+
     idt
 });
+
+#[derive(Debug, Clone, Copy)]
+#[repr(u8)]
+pub enum InterruptIndex {
+    Timer = PIC_1_OFFSET,
+}
 
 pub fn init_idt() {
     IDT.load();
@@ -26,6 +45,15 @@ extern "x86-interrupt" fn double_fault_handler(
     _error_code: u64,
 ) -> ! {
     panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
+}
+
+extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    print!(".");
+
+    unsafe {
+        PICS.lock()
+            .notify_end_of_interrupt(InterruptIndex::Timer as u8)
+    };
 }
 
 #[test_case]
