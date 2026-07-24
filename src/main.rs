@@ -7,7 +7,6 @@
 use core::panic::PanicInfo;
 
 #[unsafe(no_mangle)]
-#[allow(clippy::empty_loop)]
 pub extern "C" fn _start() -> ! {
     #[cfg(not(test))]
     main();
@@ -15,7 +14,7 @@ pub extern "C" fn _start() -> ! {
     #[cfg(test)]
     test_main();
 
-    loop {}
+    rust_os::hlt_loop()
 }
 
 #[cfg(not(test))]
@@ -33,7 +32,7 @@ fn panic(info: &PanicInfo) -> ! {
     use rust_os::println;
 
     println!("{}", info);
-    loop {}
+    rust_os::hlt_loop()
 }
 
 #[cfg(test)]

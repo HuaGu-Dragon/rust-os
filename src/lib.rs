@@ -38,21 +38,26 @@ pub extern "C" fn _start() -> ! {
     init();
     test_main();
 
-    loop {
-        core::hint::spin_loop();
-    }
+    hlt_loop()
 }
 
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     serial_println!("{}", info);
-    loop {}
+    hlt_loop()
 }
 
 pub fn exit_qemu(exit_code: QemuExitCode) {
     let mut port = x86_64::instructions::port::Port::new(0xF4);
     unsafe { port.write(exit_code as u32) };
+}
+
+pub fn hlt_loop() -> ! {
+    loop {
+        core::hint::spin_loop();
+        x86_64::instructions::hlt();
+    }
 }
 
 pub fn test_runner(tests: &[&dyn Testable]) {
