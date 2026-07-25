@@ -27,6 +27,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "413d67b29ef1021b4d60f4aa1e925ca031751e213832b4b1d588fae623c05c60"
 
 [[package]]
+name = "pc-keyboard"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73c53b65bbadd653c9d125e745d2659a3a060539b17d96ab1c59f9f5bfdacce5"
+
+[[package]]
 name = "pic8259"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -40,6 +46,7 @@ name = "rust-os"
 version = "0.1.0"
 dependencies = [
  "bootloader",
+ "pc-keyboard",
  "pic8259",
  "uart_16550",
  "x86_64",

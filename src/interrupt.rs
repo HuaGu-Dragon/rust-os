@@ -62,23 +62,25 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
 }
 
 extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    static KEYBOARD: SpinLock<
+        pc_keyboard::PS2Keyboard<pc_keyboard::layouts::Us104Key, pc_keyboard::ScancodeSet1>,
+    > = SpinLock::new(pc_keyboard::PS2Keyboard::new(
+        pc_keyboard::ScancodeSet1::new(),
+        pc_keyboard::layouts::Us104Key,
+        pc_keyboard::HandleControl::Ignore,
+    ));
+
+    let mut keyboard = KEYBOARD.lock();
     let mut port = Port::new(0x60);
     let code: u8 = unsafe { port.read() };
-    let key = match code {
-        0x02 => Some('1'),
-        0x03 => Some('2'),
-        0x04 => Some('3'),
-        0x05 => Some('4'),
-        0x06 => Some('5'),
-        0x07 => Some('6'),
-        0x08 => Some('7'),
-        0x09 => Some('8'),
-        0x0a => Some('9'),
-        0x0b => Some('0'),
-        _ => None,
-    };
-    if let Some(key) = key {
-        print!("{}", key);
+
+    if let Ok(Some(event)) = keyboard.add_byte(code)
+        && let Some(key) = keyboard.process_keyevent(event)
+    {
+        match key {
+            pc_keyboard::DecodedKey::Unicode(character) => print!("{}", character),
+            pc_keyboard::DecodedKey::RawKey(key) => print!("{:?}", key),
+        }
     }
 
     unsafe {
