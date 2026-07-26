@@ -1,11 +1,12 @@
 use pic8259::ChainedPics;
 use x86_64::{
     instructions::port::Port,
-    structures::idt::{InterruptDescriptorTable, InterruptStackFrame},
+    registers::control::Cr2,
+    structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode},
 };
 
 use crate::{
-    gdt, print, println,
+    gdt, hlt_loop, print, println,
     sync::{lazy_lock::LazyLock, spin::SpinLock},
 };
 
@@ -19,6 +20,7 @@ static IDT: LazyLock<InterruptDescriptorTable> = LazyLock::new(|| {
     let mut idt = x86_64::structures::idt::InterruptDescriptorTable::new();
     idt.breakpoint.set_handler_fn(breakpoint_handler);
     unsafe {
+        idt.page_fault.set_handler_fn(page_fault_handler);
         idt.double_fault
             .set_handler_fn(double_fault_handler)
             .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX);
@@ -43,6 +45,17 @@ pub fn init_idt() {
 
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
     println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame)
+}
+
+extern "x86-interrupt" fn page_fault_handler(
+    stack_frame: InterruptStackFrame,
+    error_code: PageFaultErrorCode,
+) {
+    println!("EXCEPTION: PAGE FAULT");
+    println!("Accessed Address: {:?}", Cr2::read());
+    println!("Error Code: {:?}", error_code);
+    println!("{:#?}", stack_frame);
+    hlt_loop();
 }
 
 extern "x86-interrupt" fn double_fault_handler(

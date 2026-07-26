@@ -24,6 +24,11 @@ fn main() {
     println!("Hello World!");
 
     rust_os::init();
+
+    let ptr = 0xdeadbeaf as *mut u8;
+    unsafe {
+        *ptr = 42;
+    }
 }
 
 #[cfg(not(test))]
